@@ -1,5 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import {
+    IsBoolean,
     IsNotEmpty,
     IsOptional,
     IsString,
@@ -12,10 +13,6 @@ import {
 // ==========================================
 
 export class CreateWarehouseDto {
-    @IsUUID()
-    @IsNotEmpty()
-    organizationId: string;
-
     @IsString()
     @IsNotEmpty()
     @MaxLength(255)
@@ -30,6 +27,10 @@ export class CreateWarehouseDto {
     @IsString()
     @MaxLength(500)
     address?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isActive?: boolean;
 }
 
 // ==========================================
@@ -47,5 +48,7 @@ export class GetWarehouseDto {
 // ==========================================
 
 export class UpdateWarehouseDto extends PartialType(
-    OmitType(CreateWarehouseDto, ['organizationId'] as const),
-) { }
+    (CreateWarehouseDto),
+) {
+
+}
