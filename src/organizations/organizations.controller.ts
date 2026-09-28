@@ -5,6 +5,7 @@ import { CreateOrganizationDto, UpdateOrganizationDto } from './dto/organization
 @Controller('api/v1/organizations')
 export class OrganizationsController {
     constructor(private readonly organizationsService: OrganizationsService) { }
+
     @Post()
     create(@Body() dto: CreateOrganizationDto) {
         return this.organizationsService.create(dto);
@@ -15,10 +16,17 @@ export class OrganizationsController {
         return this.organizationsService.findAll();
     }
 
+    // 🔓 PUBLIC: Resolve an org slug → full org object (used by login page)
+    @Get('slug/:slug')
+    findBySlug(@Param('slug') slug: string) {
+        return this.organizationsService.findBySlug(slug);
+    }
+
     @Get(':id')
     findOne(@Param('id', ParseUUIDPipe) id: string) {
         return this.organizationsService.findById(id);
     }
+
     @Patch(':id')
     update(
         @Param('id', ParseUUIDPipe) id: string,
@@ -31,6 +39,4 @@ export class OrganizationsController {
     remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.organizationsService.delete(id);
     }
-
-
 }

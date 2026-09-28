@@ -34,7 +34,20 @@ export class OrganizationsService {
         })
     }
 
-    // 3. FIND ONE BY ID
+    // 3. FIND ONE BY SLUG (used by frontend login to resolve slug → id)
+    async findBySlug(slug: string) {
+        const org = await this.prisma.organization.findUnique({
+            where: { slug },
+            select: { id: true, name: true, slug: true },
+        });
+        // Generic — intentionally doesn't reveal whether slug exists
+        if (!org) {
+            throw new NotFoundException(`Workspace not found. Double-check your workspace URL.`);
+        }
+        return org;
+    }
+
+    // 4. FIND ONE BY ID
 
     async findById(id: string) {
         const org = await this.prisma.organization.findUnique({
