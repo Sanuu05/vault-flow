@@ -35,7 +35,7 @@ export class CreateUserDto {
 }
 export class GetUsersDto {
     @IsUUID()
-    @IsNotEmpty()
+    @IsOptional() // Controller always sets this from the JWT — no need to require it in the query string
     organizationId: string
 
     @IsEmail({}, { message: 'Invalid email address format' })

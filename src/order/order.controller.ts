@@ -17,7 +17,7 @@ import { JwtAuthGuard } from 'src/users/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('api/v1/orders')
 export class OrderController {
-    constructor(private readonly ordersService: OrdersService) {}
+    constructor(private readonly ordersService: OrdersService) { }
 
     // POST /api/v1/orders
     @Post()

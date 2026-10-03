@@ -1,11 +1,12 @@
 import {
+    BadRequestException,
     ConflictException,
     Injectable,
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto, GetUsersDto, LoginDto, UserResponseDto } from './dto/user.dto';
+import { CreateUserDto, GetUsersDto, LoginDto, UpdateUserDto, UserResponseDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { JwtPayload } from './strategies/jwt.strategy';
@@ -119,5 +120,42 @@ export class UsersService {
             accessToken,
             user: plainToInstance(UserResponseDto, user),
         };
+    }
+
+    // 5. UPDATE USER (name, role, or password)
+    async updateUser(organizationId: string, id: string, dto: UpdateUserDto) {
+        await this.findOne(organizationId, { id });
+
+        const updateData: Record<string, any> = {};
+        if (dto.name !== undefined) updateData.name = dto.name;
+        if (dto.email !== undefined) updateData.email = dto.email;
+        if (dto.role !== undefined) updateData.role = dto.role;
+        if (dto.password) {
+            updateData.passwordHash = await bcrypt.hash(dto.password, 12);
+        }
+
+        const updated = await this.prisma.user.update({
+            where: { id },
+            data: updateData,
+        });
+
+        return plainToInstance(UserResponseDto, updated);
+    }
+
+    // 6. DELETE USER (cannot delete self)
+    async deleteUser(organizationId: string, callerId: string, targetId: string) {
+        if (callerId === targetId) {
+            throw new BadRequestException('You cannot delete your own account.');
+        }
+
+        const user = await this.prisma.user.findFirst({
+            where: { id: targetId, organizationId },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found in this organization.');
+        }
+
+        await this.prisma.user.delete({ where: { id: targetId } });
     }
 }
